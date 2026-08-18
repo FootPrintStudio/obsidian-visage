@@ -1,8 +1,6 @@
 import type { ParseError, ParsedTab, ParsedVTabsBlock, TabAlign, TabPosition, VTabsSettings } from "./types";
 import { TAB_ALIGNS, TAB_POSITIONS } from "./types";
 
-type Section = "none" | "options" | "tabs";
-
 function normalizeLine(raw: string): string {
 	let line = raw.trim();
 	if (line.startsWith("- ")) line = line.slice(2).trim();
@@ -66,7 +64,7 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 	const errors: ParseError[] = [];
 	let position: TabPosition = settings.defaultPosition;
 	let align: TabAlign = settings.defaultAlign;
-	let section: Section = "none";
+	let inTabs = false;
 	let sawPosition = false;
 	let sawAlign = false;
 	const tabs: ParsedTab[] = [];
@@ -93,7 +91,7 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 		const rawLine = lines[i] ?? "";
 		const lineNum = i + 1;
 
-		if (section === "tabs" && currentTitle !== null) {
+		if (inTabs && currentTitle !== null) {
 			const tabTitle = parseTabDirective(normalizeLine(rawLine));
 			if (tabTitle === null) {
 				currentBodyLines.push(rawLine);
@@ -112,17 +110,6 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 		const line = normalizeLine(rawLine);
 		if (!line || line.startsWith("#")) continue;
 
-		if (/^OPTIONS:$/i.test(line)) {
-			flushTab();
-			section = "options";
-			continue;
-		}
-		if (/^TABS:$/i.test(line)) {
-			flushTab();
-			section = "tabs";
-			continue;
-		}
-
 		const colonIndex = line.indexOf(":");
 		if (colonIndex === -1) {
 			errors.push({ line: lineNum, message: `Unrecognized line: "${line}"` });
@@ -132,8 +119,16 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 		const key = line.slice(0, colonIndex).trim().toUpperCase();
 		const value = line.slice(colonIndex + 1).trim();
 
+		if (key === "OPTIONS" || key === "TABS") {
+			errors.push({
+				line: lineNum,
+				message: `${key}: is no longer valid. Put POSITION, ALIGN, and TAB at the top level.`,
+			});
+			continue;
+		}
+
 		if (key === "TAB") {
-			section = "tabs";
+			inTabs = true;
 			flushTab();
 			if (!value) {
 				errors.push({ line: lineNum, message: "TAB requires a title." });
@@ -145,17 +140,13 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 		}
 
 		if (key === "POSITION" || key === "ALIGN") {
-			if (section === "tabs") {
+			if (inTabs) {
 				errors.push({
 					line: lineNum,
-					message: `${key} must appear in OPTIONS (before TAB entries).`,
+					message: `${key} must appear before TAB entries.`,
 				});
 				continue;
 			}
-			section = section === "none" ? "options" : section;
-		}
-
-		if (section === "options" || (section === "none" && (key === "POSITION" || key === "ALIGN"))) {
 			if (key === "POSITION") {
 				const parsed = parsePosition(value, lineNum, errors);
 				if (parsed) {
@@ -165,7 +156,7 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 						sawPosition = true;
 					}
 				}
-			} else if (key === "ALIGN") {
+			} else {
 				const parsed = parseAlign(value, lineNum, errors);
 				if (parsed) {
 					if (sawAlign) errors.push({ line: lineNum, message: "Duplicate ALIGN option." });
@@ -174,37 +165,33 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 						sawAlign = true;
 					}
 				}
-			} else {
-				errors.push({ line: lineNum, message: `Unknown option "${key}". Use POSITION or ALIGN.` });
 			}
 			continue;
 		}
 
-		errors.push({ line: lineNum, message: `Expected TAB: in TABS section (got ${key}).` });
+		errors.push({ line: lineNum, message: `Unrecognized key "${key}". Use POSITION, ALIGN, or TAB.` });
 	}
 
 	flushTab();
 
 	if (tabs.length === 0 && errors.length === 0) {
-		errors.push({ line: 1, message: "TABS section requires at least one TAB entry." });
+		errors.push({ line: 1, message: "Block requires at least one TAB entry." });
 	}
 
 	return { position, align, tabs, errors };
 }
 
 export function formatVTabsTemplate(settings: VTabsSettings): string {
-	const lines = [
-		"OPTIONS:",
+	return [
 		`POSITION: ${settings.defaultPosition}`,
 		`ALIGN: ${settings.defaultAlign}`,
-		"TABS:",
+		"",
 		`TAB: ${settings.defaultTabTitle1}`,
 		"Content here.",
 		"",
 		`TAB: ${settings.defaultTabTitle2}`,
 		"Content here.",
-	];
-	return lines.join("\n");
+	].join("\n");
 }
 
 export function formatVTabsBlock(source: string, fenceLength = 4): string {

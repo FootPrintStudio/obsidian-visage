@@ -3,7 +3,7 @@
 FootPrintStudio plugin for [Obsidian](https://obsidian.md): Reading-view **cards** and **tabs** for note layout.
 
 - **Cards** — mark a list item with a leading `` `v-card` ``. The rest stays normal markdown (spell-check, nested fences, wikilinks, images, headings, Grimoire `` `q=` ``).
-- **Tabs** — a `` v-tabs `` fence with `OPTIONS` / `TAB:` sections. Tab bodies can contain `` `v-card` `` lists.
+- **Tabs** — a `` v-tabs `` fence with optional `POSITION` / `ALIGN` and `TAB:` entries. Tab bodies can contain `` `v-card` `` lists.
 
 ```markdown
 - `v-card` ## Word Processing
@@ -13,10 +13,9 @@ FootPrintStudio plugin for [Obsidian](https://obsidian.md): Reading-view **cards
 
 `````
 ````v-tabs
-OPTIONS:
 POSITION: top
 ALIGN: left
-TABS:
+
 TAB: Overview
 Markdown for tab 1.
 
@@ -73,7 +72,7 @@ Same-line headings after the marker are promoted in Reading view:
 
 ## Quick syntax — tabs
 
-Use a `v-tabs` fence. Install **Augur** and run **Insert Visage tabs** to paste a **4-backtick** outer fence so tab bodies can contain ` ``` ` code.
+Use a `v-tabs` fence. Install **Augur** and run **Insert Visage tabs** to paste a **4-backtick** outer fence so tab bodies can contain ` ``` ` code. `POSITION` and `ALIGN` are optional (plugin defaults). `OPTIONS:` / `TABS:` headers are parse errors.
 
 | Key | Values |
 |-----|--------|

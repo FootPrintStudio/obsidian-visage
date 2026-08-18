@@ -132,10 +132,9 @@ Reading view only. Nested `v-tabs` blocks are not supported. Nested **code** fen
 
 `````
 ````v-tabs
-OPTIONS:
 POSITION: top
 ALIGN: left
-TABS:
+
 TAB: Overview
 ## Heading
 Markdown body for tab 1.
@@ -145,18 +144,19 @@ TAB: Details
 ````
 `````
 
-### OPTIONS
+`OPTIONS:` and `TABS:` headers are parse errors. Put every key at the top level.
+
+### Layout keys
 
 | Key | Values | Notes |
 |-----|--------|-------|
 | `POSITION` | `top`, `bottom`, `left`, `right` | Nav placement. Duplicate keys → parse error. |
 | `ALIGN` | `left`, `right`, `center`, `centre`, `justify` | Top/bottom nav only. Ignored for side nav. |
 
-Omit `POSITION` / `ALIGN` to use plugin defaults.
+Omit `POSITION` / `ALIGN` to use plugin defaults. Blank lines between layout keys and the first `TAB:` are allowed.
 
-### TABS
+### TAB entries
 
-- `TABS:` starts the tab list (optional; a bare `TAB:` also switches into tabs).
 - `TAB: Title` starts a tab; following lines until the next `TAB:` are markdown body.
 - Lines starting with `#` are comments **outside** tab bodies (`## Heading` inside a tab is real markdown).
 - Option lines may use an optional `- ` list prefix.
