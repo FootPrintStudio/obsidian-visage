@@ -443,3 +443,195 @@ body {
 		transition: none;
 	}
 }
+
+/* ------------------- */
+/* v-tabs              */
+
+.visage-tabs-block {
+	margin: 1rem 0;
+}
+
+.visage-tabs-host {
+	display: flex;
+	width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-s);
+	background: var(--background-secondary);
+	overflow: hidden;
+}
+
+.visage-tabs-position-top {
+	flex-direction: column;
+}
+
+.visage-tabs-position-bottom {
+	flex-direction: column-reverse;
+}
+
+.visage-tabs-position-left {
+	flex-direction: row;
+}
+
+.visage-tabs-position-right {
+	flex-direction: row-reverse;
+}
+
+.visage-tabs-nav {
+	flex-shrink: 0;
+	min-width: 0;
+}
+
+.visage-tabs-position-top .visage-tabs-nav,
+.visage-tabs-position-bottom .visage-tabs-nav {
+	width: 100%;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.visage-tabs-position-bottom .visage-tabs-nav {
+	border-bottom: none;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.visage-tabs-position-left .visage-tabs-nav,
+.visage-tabs-position-right .visage-tabs-nav {
+	width: auto;
+	max-width: 22%;
+	min-width: 120px;
+	border-right: 1px solid var(--background-modifier-border);
+}
+
+.visage-tabs-position-right .visage-tabs-nav {
+	border-right: none;
+	border-left: 1px solid var(--background-modifier-border);
+}
+
+.visage-tabs-nav-items {
+	display: flex;
+	gap: 0;
+	min-width: 0;
+}
+
+.visage-tabs-position-top .visage-tabs-nav-items,
+.visage-tabs-position-bottom .visage-tabs-nav-items {
+	flex-direction: row;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.visage-tabs-position-left .visage-tabs-nav-items,
+.visage-tabs-position-right .visage-tabs-nav-items {
+	flex-direction: column;
+	overflow-y: auto;
+	max-height: 100%;
+}
+
+.visage-tabs-position-top.visage-tabs-nav-align-left .visage-tabs-nav-items,
+.visage-tabs-position-bottom.visage-tabs-nav-align-left .visage-tabs-nav-items {
+	justify-content: flex-start;
+}
+
+.visage-tabs-position-top.visage-tabs-nav-align-right .visage-tabs-nav-items,
+.visage-tabs-position-bottom.visage-tabs-nav-align-right .visage-tabs-nav-items {
+	justify-content: flex-end;
+}
+
+.visage-tabs-position-top.visage-tabs-nav-align-center .visage-tabs-nav-items,
+.visage-tabs-position-bottom.visage-tabs-nav-align-center .visage-tabs-nav-items {
+	justify-content: center;
+}
+
+.visage-tabs-position-top.visage-tabs-nav-align-justify .visage-tabs-nav-items,
+.visage-tabs-position-bottom.visage-tabs-nav-align-justify .visage-tabs-nav-items {
+	justify-content: stretch;
+}
+
+.visage-tabs-position-top.visage-tabs-nav-align-justify .visage-tabs-nav-item,
+.visage-tabs-position-bottom.visage-tabs-nav-align-justify .visage-tabs-nav-item {
+	flex: 1 1 0;
+	text-align: center;
+}
+
+.visage-tabs-nav-item {
+	cursor: pointer;
+	padding: 0.5rem 1rem;
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-medium);
+	color: var(--text-muted);
+	border: none;
+	border-bottom: 3px solid transparent;
+	background: transparent;
+	white-space: nowrap;
+	user-select: none;
+	transition:
+		color 0.12s ease,
+		border-color 0.12s ease;
+}
+
+.visage-tabs-position-left .visage-tabs-nav-item,
+.visage-tabs-position-right .visage-tabs-nav-item {
+	border-bottom: none;
+	border-right: 3px solid transparent;
+	text-align: left;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.visage-tabs-position-right .visage-tabs-nav-item {
+	border-right: none;
+	border-left: 3px solid transparent;
+}
+
+.visage-tabs-nav-item:hover:not(.is-active) {
+	color: var(--text-normal);
+	border-color: var(--background-modifier-border-hover);
+}
+
+.visage-tabs-nav-item.is-active {
+	color: var(--text-normal);
+	border-color: var(--interactive-accent);
+}
+
+.visage-tabs-nav-label {
+	pointer-events: none;
+}
+
+.visage-tabs-panels {
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: 0;
+}
+
+.visage-tabs-panel {
+	display: none;
+	padding: 0.75rem 1rem;
+	overflow: auto;
+}
+
+.visage-tabs-panel.visage-tabs-panel-active {
+	display: block;
+}
+
+.visage-tabs-panel :is(h1, h2, h3, h4, h5, h6) {
+	margin-top: 0.5em;
+}
+
+.visage-tabs-error {
+	border-radius: 6px;
+	padding: 0.75rem 1rem;
+	background: rgba(var(--color-red-rgb), 0.12);
+	border: 1px solid rgba(var(--color-red-rgb), 0.35);
+	color: var(--text-normal);
+	font-size: 0.9rem;
+}
+
+.visage-tabs-error-line {
+	margin: 0.2rem 0;
+}
+
+.markdown-source-view.is-readable-line-width .visage-tabs-host,
+.markdown-reading-view.is-readable-line-width .visage-tabs-host {
+	max-width: var(--file-line-width);
+	margin-inline: auto;
+}

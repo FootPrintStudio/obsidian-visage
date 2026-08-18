@@ -1,6 +1,6 @@
 # Visage guide
 
-Reading view only. Card bodies are normal markdown. Only the leading inline code token is the marker.
+Reading view only. **Cards** stay normal markdown (leading `` `v-card` `` marker). **Tabs** use a `v-tabs` fence.
 
 ## Marker
 
@@ -125,3 +125,48 @@ Keep the ListDecks CSS snippet enabled for notes that still use `cssclasses: lis
 On notes that use `` `v-card` ``, **turn the ListDecks snippet off** (or drop `list-deck` from frontmatter) so both systems do not style the same lists.
 
 Visage does not require `cssclasses: list-deck`.
+
+## Tabs (`v-tabs`)
+
+Reading view only. Nested `v-tabs` blocks are not supported. Nested **code** fences are, if the outer fence is longer than any inner fence. The **Insert Visage tabs** command uses four backticks.
+
+`````
+````v-tabs
+OPTIONS:
+POSITION: top
+ALIGN: left
+TABS:
+TAB: Overview
+## Heading
+Markdown body for tab 1.
+
+TAB: Details
+- `v-card` Card inside a tab
+````
+`````
+
+### OPTIONS
+
+| Key | Values | Notes |
+|-----|--------|-------|
+| `POSITION` | `top`, `bottom`, `left`, `right` | Nav placement. Duplicate keys → parse error. |
+| `ALIGN` | `left`, `right`, `center`, `centre`, `justify` | Top/bottom nav only. Ignored for side nav. |
+
+Omit `POSITION` / `ALIGN` to use plugin defaults.
+
+### TABS
+
+- `TABS:` starts the tab list (optional; a bare `TAB:` also switches into tabs).
+- `TAB: Title` starts a tab; following lines until the next `TAB:` are markdown body.
+- Lines starting with `#` are comments **outside** tab bodies (`## Heading` inside a tab is real markdown).
+- Option lines may use an optional `- ` list prefix.
+- Tab body lines are literal — nested fences, colons, and `OPTIONS:` text in content are preserved.
+
+### Deep links
+
+`[[Note#Tab Title]]` activates that tab in Reading view. Skipped when a real markdown heading of the same name exists. Exact title match is case-sensitive; slugified forms also match (`My Tab` ↔ `my-tab`).
+
+### Nested code
+
+The outer fence must be longer than any fence inside tab bodies. If it is too short, Visage shows a red error with the required backtick count. The block source is re-read from the vault file so nested fences are complete.
+
