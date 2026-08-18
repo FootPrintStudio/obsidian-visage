@@ -73,7 +73,7 @@ Same-line headings after the marker are promoted in Reading view:
 
 ## Quick syntax — tabs
 
-Use a `v-tabs` fence. The **Insert Visage tabs** command pastes a **4-backtick** outer fence so tab bodies can contain ` ``` ` code.
+Use a `v-tabs` fence. Install **Augur** and run **Insert Visage tabs** to paste a **4-backtick** outer fence so tab bodies can contain ` ``` ` code.
 
 | Key | Values |
 |-----|--------|

@@ -1,4 +1,4 @@
-import { MarkdownView, Notice, Plugin } from "obsidian";
+import { MarkdownView, Plugin } from "obsidian";
 import { processVisage } from "./process";
 import { VisageSettingTab } from "./settings";
 import {
@@ -7,7 +7,6 @@ import {
 	type PendingTabLink,
 	type TabLinkTarget,
 } from "./tabs/deepLink";
-import { formatVTabsBlock, formatVTabsTemplate } from "./tabs/parseBlock";
 import { TabsBlock, createTabsBlock } from "./tabs/tabsBlock";
 import { DEFAULT_SETTINGS, type VisageSettings } from "./types";
 
@@ -51,24 +50,6 @@ export default class VisagePlugin extends Plugin {
 			}),
 		);
 
-		this.addCommand({
-			id: "insert-v-tabs",
-			name: "Insert Visage tabs",
-			icon: "layout",
-			editorCheckCallback: (checking) => {
-				const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (checking) return Boolean(view?.editor);
-				if (!view?.editor) {
-					new Notice("Open a note to insert a Visage tabs block.");
-					return false;
-				}
-				const block = formatVTabsBlock(formatVTabsTemplate(this.settings));
-				const cursor = view.editor.getCursor();
-				view.editor.replaceRange(`${block}\n`, cursor);
-				new Notice("Visage tabs block inserted.");
-				return true;
-			},
-		});
 	}
 
 	applyCssVars(): void {

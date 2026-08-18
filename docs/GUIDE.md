@@ -128,7 +128,7 @@ Visage does not require `cssclasses: list-deck`.
 
 ## Tabs (`v-tabs`)
 
-Reading view only. Nested `v-tabs` blocks are not supported. Nested **code** fences are, if the outer fence is longer than any inner fence. The **Insert Visage tabs** command uses four backticks.
+Reading view only. Nested `v-tabs` blocks are not supported. Nested **code** fences are, if the outer fence is longer than any inner fence. Install **Augur** — **Insert Visage tabs** uses four backticks.
 
 `````
 ````v-tabs
