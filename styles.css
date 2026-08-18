@@ -1,0 +1,445 @@
+/* Visage — Reading-view cards from `v-card` list items.
+   Look based on ListDecks / kepano card-list. MIT. */
+
+body {
+	--deck-gap: 0.35rem;
+	--deck-padding: 0.65em;
+	--deck-image-height: 800px;
+	--deck-image-fit: contain;
+	--deck-background: transparent;
+	--deck-border-width: 1px;
+	--deck-aspect-ratio: auto;
+	--deck-card-radius: var(--radius-s, 5px);
+}
+
+/* ------------------- */
+/* 8-slot card deck (flex: odd counts share leftover equally) */
+
+.markdown-preview-view ul.visage-deck {
+	--deck-col: calc((100% - 7 * var(--deck-gap)) / 8);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: stretch;
+	gap: var(--deck-gap);
+	padding: 0;
+	line-height: var(--line-height-tight);
+	list-style: none;
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-flex-break {
+	flex: 0 0 100%;
+	height: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+	overflow: hidden;
+	list-style: none;
+	pointer-events: none;
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-flex-break > .list-bullet,
+.markdown-preview-view ul.visage-deck > li.visage-flex-break > .list-collapse-indicator,
+.markdown-preview-view ul.visage-deck > li.visage-flex-break > .collapse-indicator {
+	display: none !important;
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-plain-row {
+	flex: 0 0 100%;
+	list-style: none;
+	padding-inline-start: var(--list-indent, 2em);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card {
+	flex: 1 1 var(--deck-col);
+	box-sizing: border-box;
+	min-width: 0;
+	max-width: 100%;
+	background-color: var(--deck-background);
+	padding: calc(var(--deck-padding) / 2);
+	border-radius: var(--deck-card-radius);
+	border: var(--deck-border-width) solid var(--background-modifier-border);
+	overflow: hidden;
+	list-style: none;
+	margin-inline-start: 0;
+	font-weight: 500;
+	box-shadow: var(--shadow-s);
+	transition:
+		box-shadow 0.15s linear,
+		border-color 0.15s linear;
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="2"] {
+	flex: 0 0 calc(var(--deck-col) * 2 + var(--deck-gap) * 1);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="3"] {
+	flex: 0 0 calc(var(--deck-col) * 3 + var(--deck-gap) * 2);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="4"] {
+	flex: 0 0 calc(var(--deck-col) * 4 + var(--deck-gap) * 3);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="5"] {
+	flex: 0 0 calc(var(--deck-col) * 5 + var(--deck-gap) * 4);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="6"] {
+	flex: 0 0 calc(var(--deck-col) * 6 + var(--deck-gap) * 5);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="7"] {
+	flex: 0 0 calc(var(--deck-col) * 7 + var(--deck-gap) * 6);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="full"] {
+	flex: 0 0 100%;
+}
+
+@media (max-width: 400pt) {
+	.markdown-preview-view ul.visage-deck > li.visage-card {
+		flex: 0 0 100% !important;
+	}
+}
+
+/* Hide list chrome on cards only — unmarked nested lists keep bullets */
+.markdown-preview-view li.visage-card > .list-bullet,
+.markdown-preview-view li.visage-card > .list-collapse-indicator,
+.markdown-preview-view li.visage-card > .collapse-indicator,
+.markdown-preview-view li.visage-subcard > .list-bullet,
+.markdown-preview-view li.visage-subcard > .list-collapse-indicator,
+.markdown-preview-view li.visage-subcard > .collapse-indicator {
+	display: none !important;
+}
+
+.markdown-preview-view li.visage-card::marker,
+.markdown-preview-view li.visage-subcard::marker {
+	content: none;
+}
+
+.markdown-preview-view li.visage-card::before,
+.markdown-preview-view li.visage-subcard::before {
+	content: none !important;
+	display: none !important;
+	width: 0 !important;
+	height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: none !important;
+	background: none !important;
+}
+
+.markdown-preview-view li.visage-card > a,
+.markdown-preview-view li.visage-subcard > a {
+	--link-decoration: none;
+	--link-external-decoration: none;
+	font-weight: var(--bold-weight);
+}
+
+.markdown-preview-view li.visage-card:hover {
+	border-color: var(--background-modifier-border-hover);
+	box-shadow: var(--shadow-s);
+}
+
+.markdown-preview-view li.visage-card > ul {
+	width: 100%;
+	margin: calc(var(--deck-padding) / -5) 0;
+	padding: calc(var(--deck-padding) / 3) 0;
+	padding-inline-start: 0;
+	margin-inline-start: 0;
+}
+
+.markdown-preview-view li.visage-card .image-embed {
+	padding: 0;
+	display: block;
+	background-color: var(--background-secondary);
+	border-radius: var(--image-radius);
+}
+
+.markdown-preview-view li.visage-card .image-embed img {
+	aspect-ratio: var(--deck-aspect-ratio);
+	object-fit: var(--deck-image-fit);
+	max-height: var(--deck-image-height);
+	background-color: var(--background-secondary);
+	vertical-align: bottom;
+}
+
+/* Hidden `v-card` marker */
+.markdown-preview-view .visage-marker {
+	display: none !important;
+}
+
+.markdown-preview-view .visage-error {
+	display: inline-block;
+	margin: 0 0 0.35em;
+	padding: 0.1em 0.4em;
+	font-size: 0.75em;
+	font-weight: 600;
+	color: var(--text-error, var(--color-red));
+	border: 1px solid var(--text-error, var(--color-red));
+	border-radius: var(--radius-s, 5px);
+}
+
+/* Same-line headings promoted after the marker */
+.markdown-preview-view li.visage-card > .heading,
+.markdown-preview-view li.visage-subcard > .heading {
+	margin-top: 0;
+	margin-bottom: 0.25em;
+	line-height: var(--line-height-tight);
+}
+
+.markdown-preview-view li.visage-card > h1,
+.markdown-preview-view li.visage-subcard > h1 {
+	font-size: 1.35em;
+}
+
+.markdown-preview-view li.visage-card > h2,
+.markdown-preview-view li.visage-subcard > h2 {
+	font-size: 1.2em;
+}
+
+.markdown-preview-view li.visage-card > h3,
+.markdown-preview-view li.visage-subcard > h3 {
+	font-size: 1.08em;
+}
+
+.markdown-preview-view li.visage-card > h4,
+.markdown-preview-view li.visage-card > h5,
+.markdown-preview-view li.visage-card > h6,
+.markdown-preview-view li.visage-subcard > h4,
+.markdown-preview-view li.visage-subcard > h5,
+.markdown-preview-view li.visage-subcard > h6 {
+	font-size: 1em;
+}
+
+/* Nested unmarked items stay a normal list (bullets + indent) */
+.markdown-preview-view li.visage-card > ul > li:not(.visage-card) {
+	font-weight: var(--font-normal, 400);
+	padding-inline-start: var(--list-indent, 1.5em);
+}
+
+/* Subcards */
+.markdown-preview-view li.visage-subcard {
+	background-color: var(--deck-background);
+	padding: calc(var(--deck-padding) / 2) calc(var(--deck-padding) / 2 + 4px);
+	border-radius: var(--deck-card-radius);
+	border: var(--deck-border-width) solid var(--background-modifier-border);
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+	display: block;
+	margin: calc(var(--deck-padding) / 3) 0 0;
+	margin-inline-start: 0;
+	padding-inline-start: 0.25em;
+	font-weight: 500;
+	overflow: hidden;
+	list-style: none;
+	transition:
+		box-shadow 0.15s linear,
+		border-color 0.15s linear;
+}
+
+.markdown-preview-view li.visage-subcard:hover {
+	border-color: var(--background-modifier-border-hover);
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Tone — must beat ul.visage-deck > li.visage-card border/background */
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-color,
+.markdown-preview-view li.visage-subcard.visage-tone-color {
+	border-color: var(--deck-tone);
+	background-color: color-mix(in srgb, var(--deck-tone) 10%, var(--deck-background, transparent));
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-note,
+.markdown-preview-view li.visage-subcard.visage-tone-note {
+	border-color: var(--color-blue, var(--color-accent));
+	background-color: color-mix(in srgb, var(--color-blue, var(--color-accent)) 8%, transparent);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-tip,
+.markdown-preview-view li.visage-subcard.visage-tone-tip {
+	border-color: var(--color-cyan, var(--color-green));
+	background-color: color-mix(in srgb, var(--color-cyan, var(--color-green)) 8%, transparent);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-warning,
+.markdown-preview-view li.visage-subcard.visage-tone-warning {
+	border-color: var(--color-orange, var(--color-yellow));
+	background-color: color-mix(in srgb, var(--color-orange, var(--color-yellow)) 8%, transparent);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-danger,
+.markdown-preview-view li.visage-subcard.visage-tone-danger {
+	border-color: var(--color-red);
+	background-color: color-mix(in srgb, var(--color-red) 8%, transparent);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-success,
+.markdown-preview-view li.visage-subcard.visage-tone-success {
+	border-color: var(--color-green);
+	background-color: color-mix(in srgb, var(--color-green) 8%, transparent);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-neutral,
+.markdown-preview-view li.visage-subcard.visage-tone-neutral {
+	border-color: var(--background-modifier-border);
+	background-color: color-mix(in srgb, var(--text-muted) 6%, transparent);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-color:hover,
+.markdown-preview-view li.visage-subcard.visage-tone-color:hover {
+	border-color: var(--deck-tone);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-note:hover,
+.markdown-preview-view li.visage-subcard.visage-tone-note:hover {
+	border-color: var(--color-blue, var(--color-accent));
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-tip:hover,
+.markdown-preview-view li.visage-subcard.visage-tone-tip:hover {
+	border-color: var(--color-cyan, var(--color-green));
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-warning:hover,
+.markdown-preview-view li.visage-subcard.visage-tone-warning:hover {
+	border-color: var(--color-orange, var(--color-yellow));
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-danger:hover,
+.markdown-preview-view li.visage-subcard.visage-tone-danger:hover {
+	border-color: var(--color-red);
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-tone-success:hover,
+.markdown-preview-view li.visage-subcard.visage-tone-success:hover {
+	border-color: var(--color-green);
+}
+
+/* Hero — first image flush with card borders (not inset by card padding) */
+.markdown-preview-view li.visage-hero {
+	--hero-pad-y: calc(var(--deck-padding) / 2);
+	--hero-pad-x: calc(var(--deck-padding) / 2);
+}
+
+.markdown-preview-view li.visage-subcard.visage-hero {
+	--hero-pad-x: calc(var(--deck-padding) / 2 + 4px);
+}
+
+.markdown-preview-view li.visage-hero > p:has(.image-embed) {
+	margin: 0;
+	padding: 0;
+	line-height: 0;
+}
+
+.markdown-preview-view li.visage-hero .image-embed {
+	display: block;
+	box-sizing: border-box;
+	width: calc(100% + 2 * var(--hero-pad-x));
+	max-width: none;
+	margin-inline: calc(-1 * var(--hero-pad-x));
+	margin-bottom: calc(var(--deck-padding) / 3);
+	padding: 0;
+	background: transparent;
+	border-radius: 0;
+	overflow: hidden;
+}
+
+.markdown-preview-view li.visage-hero > .image-embed,
+.markdown-preview-view li.visage-hero > p:has(> .image-embed) .image-embed {
+	margin-top: calc(-1 * var(--hero-pad-y));
+	border-radius: var(--deck-card-radius) var(--deck-card-radius) 0 0;
+}
+
+.markdown-preview-view li.visage-hero .image-embed img {
+	display: block;
+	width: 100%;
+	max-width: none;
+	max-height: var(--deck-image-height);
+	object-fit: cover;
+	border-radius: inherit;
+	background: transparent;
+	vertical-align: bottom;
+}
+
+/* Footer subcards — contiguous tail pinned to the bottom */
+.markdown-preview-view li.visage-has-footer {
+	display: flex;
+	flex-direction: column;
+	min-height: 10em;
+}
+
+.markdown-preview-view li.visage-has-footer > ul.visage-footer-host {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	padding-inline-start: 0;
+}
+
+.markdown-preview-view li.visage-has-footer > ul.visage-footer-host > li.visage-footer-tail {
+	margin-top: calc(var(--deck-padding) / 3);
+}
+
+.markdown-preview-view li.visage-has-footer > ul.visage-footer-host > li.visage-footer-first {
+	margin-top: auto;
+}
+
+.markdown-preview-view li.visage-has-footer > ul.visage-inline-host.visage-footer-host {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: stretch;
+	flex: 1 1 auto;
+}
+
+/* Inline subcards — mini-grid among siblings */
+.markdown-preview-view ul.visage-inline-host {
+	display: flex;
+	flex-wrap: wrap;
+	gap: calc(var(--deck-gap) / 2);
+	padding-inline-start: 0;
+}
+
+.markdown-preview-view ul.visage-inline-host > li.visage-inline {
+	flex: 1 1 0;
+	min-width: 4em;
+	margin-top: calc(var(--deck-padding) / 3);
+}
+
+.markdown-preview-view ul.visage-inline-host > li:not(.visage-inline) {
+	flex-basis: 100%;
+}
+
+/* Settings tabs */
+.visage-settings-tabs {
+	display: flex;
+	gap: 0;
+	margin: 0.75rem 0 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.visage-settings-tab {
+	padding: 0.45rem 0.9rem;
+	cursor: pointer;
+	color: var(--text-muted);
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+}
+
+.visage-settings-tab.is-active {
+	color: var(--text-normal);
+	border-bottom-color: var(--interactive-accent);
+}
+
+.visage-readme-panel,
+.visage-guide-panel {
+	padding-top: 0.5rem;
+	max-height: 70vh;
+	overflow: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.markdown-preview-view li.visage-card,
+	.markdown-preview-view li.visage-subcard {
+		transition: none;
+	}
+}

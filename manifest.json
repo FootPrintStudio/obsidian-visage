@@ -1,0 +1,10 @@
+{
+	"id": "visage",
+	"name": "Visage",
+	"version": "0.1.0",
+	"minAppVersion": "1.5.0",
+	"description": "Turn markdown list items marked with `v-card` into Reading-view cards.",
+	"author": "FootPrintStudio",
+	"authorUrl": "https://github.com/FootPrintStudio",
+	"isDesktopOnly": false
+}
