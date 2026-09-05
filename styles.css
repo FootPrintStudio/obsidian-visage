@@ -130,6 +130,7 @@ body {
 }
 
 .markdown-preview-view li.visage-card > a,
+.markdown-preview-view li.visage-card > .visage-card-body > a,
 .markdown-preview-view li.visage-subcard > a {
 	--link-decoration: none;
 	--link-external-decoration: none;
@@ -141,7 +142,8 @@ body {
 	box-shadow: var(--shadow-s);
 }
 
-.markdown-preview-view li.visage-card > ul {
+.markdown-preview-view li.visage-card > ul,
+.markdown-preview-view li.visage-card > .visage-card-body > ul {
 	width: 100%;
 	margin: calc(var(--deck-padding) / -5) 0;
 	padding: calc(var(--deck-padding) / 3) 0;
@@ -182,6 +184,7 @@ body {
 
 /* Same-line headings promoted after the marker */
 .markdown-preview-view li.visage-card > .heading,
+.markdown-preview-view li.visage-card > .visage-card-body > .heading,
 .markdown-preview-view li.visage-subcard > .heading {
 	margin-top: 0;
 	margin-bottom: 0.25em;
@@ -189,16 +192,19 @@ body {
 }
 
 .markdown-preview-view li.visage-card > h1,
+.markdown-preview-view li.visage-card > .visage-card-body > h1,
 .markdown-preview-view li.visage-subcard > h1 {
 	font-size: 1.35em;
 }
 
 .markdown-preview-view li.visage-card > h2,
+.markdown-preview-view li.visage-card > .visage-card-body > h2,
 .markdown-preview-view li.visage-subcard > h2 {
 	font-size: 1.2em;
 }
 
 .markdown-preview-view li.visage-card > h3,
+.markdown-preview-view li.visage-card > .visage-card-body > h3,
 .markdown-preview-view li.visage-subcard > h3 {
 	font-size: 1.08em;
 }
@@ -206,6 +212,9 @@ body {
 .markdown-preview-view li.visage-card > h4,
 .markdown-preview-view li.visage-card > h5,
 .markdown-preview-view li.visage-card > h6,
+.markdown-preview-view li.visage-card > .visage-card-body > h4,
+.markdown-preview-view li.visage-card > .visage-card-body > h5,
+.markdown-preview-view li.visage-card > .visage-card-body > h6,
 .markdown-preview-view li.visage-subcard > h4,
 .markdown-preview-view li.visage-subcard > h5,
 .markdown-preview-view li.visage-subcard > h6 {
@@ -213,7 +222,8 @@ body {
 }
 
 /* Nested unmarked items stay a normal list (bullets + indent) */
-.markdown-preview-view li.visage-card > ul > li:not(.visage-card) {
+.markdown-preview-view li.visage-card > ul > li:not(.visage-card),
+.markdown-preview-view li.visage-card > .visage-card-body > ul > li:not(.visage-card) {
 	font-weight: var(--font-normal, 400);
 	padding-inline-start: var(--list-indent, 1.5em);
 }
@@ -366,6 +376,12 @@ body {
 	display: flex;
 	flex-direction: column;
 	min-height: 10em;
+}
+
+.markdown-preview-view li.visage-has-footer > .visage-card-body {
+	flex: 0 1 auto;
+	min-width: 0;
+	width: 100%;
 }
 
 .markdown-preview-view li.visage-has-footer > ul.visage-footer-host {

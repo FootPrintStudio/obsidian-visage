@@ -74,7 +74,7 @@ Those three are equal width. You do not need `{span=fill}` just to stretch a sho
 
 `inline` / `footer` on a top-level card are ignored.
 
-Footer subcards must be the last nested items (no unmarked items after them). Multiple footers are allowed if they are all at the bottom. The parent uses column flex; the footer group gets `margin-top: auto`.
+Footer subcards must be the last nested items (no unmarked items after them). Multiple footers are allowed if they are all at the bottom. The parent uses column flex with body content wrapped so inline queries stay on one line; the footer group gets `margin-top: auto`.
 
 ```markdown
 - `v-card {span=full}` Dashboard

@@ -157,12 +157,46 @@ function layoutNested(ul: HTMLElement): void {
 	}
 	if (tailStart < items.length) {
 		ul.classList.add("visage-footer-host");
-		ul.closest(".visage-card")?.classList.add("visage-has-footer");
+		const parent = ul.closest(".visage-card");
+		if (parent instanceof HTMLElement) {
+			parent.classList.add("visage-has-footer");
+			ensureCardBody(parent);
+		}
 		items[tailStart]!.classList.add("visage-footer-first");
 		for (let i = tailStart; i < items.length; i++) {
 			items[i]!.classList.add("visage-footer-tail");
 		}
 	}
+}
+
+/**
+ * Column flex on cards with footers would put every element child (including
+ * Grimoire/Dataview inline results) on its own row. Wrap non-footer content
+ * into one body flex item so inlines stay inline.
+ */
+function ensureCardBody(card: HTMLElement): void {
+	if (Array.from(card.children).some((el) => el.classList.contains("visage-card-body"))) {
+		return;
+	}
+
+	const body = document.createElement("div");
+	body.className = "visage-card-body";
+
+	for (const child of Array.from(card.childNodes)) {
+		if (child instanceof HTMLElement) {
+			if (isChrome(child)) continue;
+			if (child.classList.contains("visage-marker")) continue;
+			if (child.classList.contains("visage-error")) continue;
+			if (child.tagName === "UL" && child.classList.contains("visage-footer-host")) continue;
+		}
+		body.appendChild(child);
+	}
+
+	if (body.childNodes.length === 0) return;
+
+	const footerHost = card.querySelector(":scope > ul.visage-footer-host");
+	if (footerHost) card.insertBefore(body, footerHost);
+	else card.appendChild(body);
 }
 
 function applyAssignments(

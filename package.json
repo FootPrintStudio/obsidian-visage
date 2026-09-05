@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-visage",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Visage — markdown list cards and tabs for Obsidian Reading view.",
 	"main": "main.js",
 	"type": "module",
