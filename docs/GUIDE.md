@@ -14,7 +14,7 @@ The **first** inline code on a list item must be `v-card`, optionally followed b
 ```
 
 - Bags may appear in any order.
-- At most one `span`, one `layout`, and one `tone`.
+- At most one `span`, one `layout`, one `tone`, and one `border`.
 - Unknown keys show a small error on the card.
 - Other inline code (including Grimoire `` `q=` ``) is never treated as a card marker.
 
@@ -100,6 +100,15 @@ Applied as `--deck-tone` on the card, or a preset class.
 
 Presets: `note` | `tip` | `warning` | `danger` | `success` | `neutral` (theme tokens).
 
+## Border
+
+```markdown
+- `v-card {border=none}`
+- `v-card {tone=warning} {border=none}`
+```
+
+`border=none` (aliases `0`, `false`) removes the card border and shadow. Tone background tint still applies when both are set.
+
 ## Headings
 
 CommonMark does not parse `#` after inline code on the same line as an ATX heading. Visage promotes leftover `#{1,6}` + space after hiding the marker:
@@ -135,11 +144,11 @@ Reading view only. Nested `v-tabs` blocks are not supported. Nested **code** fen
 POSITION: top
 ALIGN: left
 
-TAB: Overview
+TAB: Overview {tone=warning}
 ## Heading
 Markdown body for tab 1.
 
-TAB: Details
+TAB: Details {tone=#8c65e6}
 - `v-card` Card inside a tab
 ````
 `````
@@ -158,6 +167,7 @@ Omit `POSITION` / `ALIGN` to use plugin defaults. Blank lines between layout key
 ### TAB entries
 
 - `TAB: Title` starts a tab; following lines until the next `TAB:` are markdown body.
+- Optional bags after the title: `TAB: Overview {tone=warning}` or `TAB: Details {tone=#8c65e6}` (same Tone presets / HEX / `rgb()` as cards). Bags are stripped from the displayed title.
 - Lines starting with `#` are comments **outside** tab bodies (`## Heading` inside a tab is real markdown).
 - Option lines may use an optional `- ` list prefix.
 - Tab body lines are literal — nested fences, colons, and `OPTIONS:` text in content are preserved.

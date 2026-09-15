@@ -2,6 +2,8 @@ export type SpanValue = 1 | 2 | 3 | 4 | 5 | 6 | 7 | "full" | "fill";
 
 export type LayoutValue = "hero" | "inline" | "footer";
 
+export type BorderValue = "none";
+
 export type TonePreset = "note" | "tip" | "warning" | "danger" | "success" | "neutral";
 
 export type ToneValue =
@@ -12,6 +14,7 @@ export interface ParsedVCard {
 	span: SpanValue;
 	layout?: LayoutValue;
 	tone?: ToneValue;
+	border?: BorderValue;
 	errors: string[];
 }
 
@@ -43,6 +46,7 @@ export function parseVCardMarker(raw: string): ParsedVCard | null {
 	let span: SpanValue = 1;
 	let layout: LayoutValue | undefined;
 	let tone: ToneValue | undefined;
+	let border: BorderValue | undefined;
 
 	if (!rest) {
 		return { span, errors };
@@ -86,6 +90,10 @@ export function parseVCardMarker(raw: string): ParsedVCard | null {
 			const parsed = parseTone(value);
 			if (parsed === null) errors.push(`Invalid tone “${value}”`);
 			else tone = parsed;
+		} else if (key === "border") {
+			const parsed = parseBorder(value);
+			if (parsed === null) errors.push(`Invalid border “${value}”`);
+			else border = parsed;
 		} else {
 			errors.push(`Unknown key “${key}”`);
 		}
@@ -96,7 +104,67 @@ export function parseVCardMarker(raw: string): ParsedVCard | null {
 		errors.push(`Unexpected text “${trailing}”`);
 	}
 
-	return { span, layout, tone, errors };
+	return { span, layout, tone, border, errors };
+}
+
+/**
+ * Parse attribute bags from a string that may include leading title text.
+ * Returns the title (text before bags) plus parsed key/value bags.
+ */
+export function parseAttributeBags(raw: string): {
+	title: string;
+	bags: Array<{ key: string; value: string }>;
+	errors: string[];
+} {
+	const text = raw.trim();
+	const errors: string[] = [];
+	const bags: Array<{ key: string; value: string }> = [];
+	const seen = new Set<string>();
+
+	BAG_RE.lastIndex = 0;
+	if (!BAG_RE.test(text)) {
+		return { title: text, bags, errors };
+	}
+
+	let cursor = 0;
+	BAG_RE.lastIndex = 0;
+	let match: RegExpExecArray | null;
+	let firstBagStart = -1;
+	while ((match = BAG_RE.exec(text)) !== null) {
+		if (firstBagStart === -1) firstBagStart = match.index;
+		const between = text.slice(cursor, match.index).trim();
+		if (cursor > 0 && between) {
+			errors.push(`Unexpected text “${between}”`);
+		}
+		cursor = match.index + match[0].length;
+		const bag = (match[1] ?? "").trim();
+		if (!bag) {
+			errors.push("Empty attribute bag");
+			continue;
+		}
+		const eq = bag.indexOf("=");
+		if (eq < 1) {
+			errors.push(`Invalid attribute “${bag}”`);
+			continue;
+		}
+		const key = bag.slice(0, eq).trim().toLowerCase();
+		const value = bag.slice(eq + 1).trim();
+		if (seen.has(key)) {
+			errors.push(`Duplicate “${key}” (only one of each key is allowed)`);
+			continue;
+		}
+		seen.add(key);
+		bags.push({ key, value });
+	}
+
+	const trailing = text.slice(cursor).trim();
+	if (trailing) {
+		errors.push(`Unexpected text “${trailing}”`);
+	}
+
+	const title =
+		firstBagStart === -1 ? text : text.slice(0, firstBagStart).trim();
+	return { title, bags, errors };
 }
 
 function parseSpan(value: string): SpanValue | null {
@@ -113,7 +181,13 @@ function parseLayout(value: string): LayoutValue | null {
 	return null;
 }
 
-function parseTone(value: string): ToneValue | null {
+function parseBorder(value: string): BorderValue | null {
+	const v = value.trim().toLowerCase();
+	if (v === "none" || v === "0" || v === "false") return "none";
+	return null;
+}
+
+export function parseTone(value: string): ToneValue | null {
 	const v = value.trim();
 	const lower = v.toLowerCase();
 	if (TONE_PRESETS.has(lower as TonePreset)) {
@@ -123,4 +197,15 @@ function parseTone(value: string): ToneValue | null {
 		return { kind: "color", value: v };
 	}
 	return null;
+}
+
+/** Apply tone preset class or custom --deck-tone colour to an element. */
+export function applyTone(el: HTMLElement, tone: ToneValue | undefined): void {
+	if (!tone) return;
+	if (tone.kind === "preset") {
+		el.classList.add(`visage-tone-${tone.value}`);
+		return;
+	}
+	el.classList.add("visage-tone-color");
+	el.style.setProperty("--deck-tone", tone.value);
 }

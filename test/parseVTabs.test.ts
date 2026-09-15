@@ -52,6 +52,26 @@ describe("parseVTabsBlock", () => {
 		expect(parsed.errors.some((error) => /at least one TAB entry/.test(error.message))).toBe(true);
 	});
 
+	it("parses TAB tone presets and strips bags from title", () => {
+		const parsed = parseVTabsBlock(
+			["TAB: Overview {tone=warning}", "Hello", "", "TAB: Details {tone=#8c65e6}", "World"].join(
+				"\n",
+			),
+			DEFAULT_SETTINGS,
+		);
+		expect(parsed.errors).toEqual([]);
+		expect(parsed.tabs[0]?.title).toBe("Overview");
+		expect(parsed.tabs[0]?.tone).toEqual({ kind: "preset", value: "warning" });
+		expect(parsed.tabs[1]?.title).toBe("Details");
+		expect(parsed.tabs[1]?.tone).toEqual({ kind: "color", value: "#8c65e6" });
+	});
+
+	it("records invalid TAB tone as an error", () => {
+		const parsed = parseVTabsBlock("TAB: Overview {tone=purple}\nHi", DEFAULT_SETTINGS);
+		expect(parsed.errors.some((error) => /Invalid tone/.test(error.message))).toBe(true);
+		expect(parsed.tabs[0]?.title).toBe("Overview");
+	});
+
 	it("formats a v-tabs fence", () => {
 		expect(formatVTabsBlock("TAB: One\nHi", 4)).toBe("````v-tabs\nTAB: One\nHi\n````");
 	});

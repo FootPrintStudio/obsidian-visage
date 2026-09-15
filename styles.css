@@ -142,6 +142,18 @@ body {
 	box-shadow: var(--shadow-s);
 }
 
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-borderless,
+.markdown-preview-view li.visage-subcard.visage-borderless {
+	border: none;
+	box-shadow: none;
+}
+
+.markdown-preview-view ul.visage-deck > li.visage-card.visage-borderless:hover,
+.markdown-preview-view li.visage-subcard.visage-borderless:hover {
+	border: none;
+	box-shadow: none;
+}
+
 .markdown-preview-view li.visage-card > ul,
 .markdown-preview-view li.visage-card > .visage-card-body > ul {
 	width: 100%;
@@ -607,6 +619,66 @@ body {
 .visage-tabs-nav-item.is-active {
 	color: var(--text-normal);
 	border-color: var(--interactive-accent);
+}
+
+/* Tab tones — indicator uses tone colour (presets + custom HEX/rgb) */
+.visage-tabs-nav-item.visage-tone-color {
+	--visage-tab-tone: var(--deck-tone);
+}
+
+.visage-tabs-nav-item.visage-tone-note {
+	--visage-tab-tone: var(--color-blue, var(--color-accent));
+}
+
+.visage-tabs-nav-item.visage-tone-tip {
+	--visage-tab-tone: var(--color-cyan, var(--color-green));
+}
+
+.visage-tabs-nav-item.visage-tone-warning {
+	--visage-tab-tone: var(--color-orange, var(--color-yellow));
+}
+
+.visage-tabs-nav-item.visage-tone-danger {
+	--visage-tab-tone: var(--color-red);
+}
+
+.visage-tabs-nav-item.visage-tone-success {
+	--visage-tab-tone: var(--color-green);
+}
+
+.visage-tabs-nav-item.visage-tone-neutral {
+	--visage-tab-tone: var(--text-muted);
+}
+
+.visage-tabs-nav-item.visage-tone-color,
+.visage-tabs-nav-item.visage-tone-note,
+.visage-tabs-nav-item.visage-tone-tip,
+.visage-tabs-nav-item.visage-tone-warning,
+.visage-tabs-nav-item.visage-tone-danger,
+.visage-tabs-nav-item.visage-tone-success,
+.visage-tabs-nav-item.visage-tone-neutral {
+	background-color: color-mix(in srgb, var(--visage-tab-tone) 8%, transparent);
+}
+
+.visage-tabs-nav-item.visage-tone-color:hover:not(.is-active),
+.visage-tabs-nav-item.visage-tone-note:hover:not(.is-active),
+.visage-tabs-nav-item.visage-tone-tip:hover:not(.is-active),
+.visage-tabs-nav-item.visage-tone-warning:hover:not(.is-active),
+.visage-tabs-nav-item.visage-tone-danger:hover:not(.is-active),
+.visage-tabs-nav-item.visage-tone-success:hover:not(.is-active),
+.visage-tabs-nav-item.visage-tone-neutral:hover:not(.is-active) {
+	border-color: var(--visage-tab-tone);
+}
+
+.visage-tabs-nav-item.visage-tone-color.is-active,
+.visage-tabs-nav-item.visage-tone-note.is-active,
+.visage-tabs-nav-item.visage-tone-tip.is-active,
+.visage-tabs-nav-item.visage-tone-warning.is-active,
+.visage-tabs-nav-item.visage-tone-danger.is-active,
+.visage-tabs-nav-item.visage-tone-success.is-active,
+.visage-tabs-nav-item.visage-tone-neutral.is-active {
+	border-color: var(--visage-tab-tone);
+	background-color: color-mix(in srgb, var(--visage-tab-tone) 14%, transparent);
 }
 
 .visage-tabs-nav-label {

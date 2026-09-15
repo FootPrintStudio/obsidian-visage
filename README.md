@@ -55,13 +55,14 @@ Required, first inline code on the item:
 
 Optional exclusive bags (at most one of each key; order does not matter):
 
-- `` `v-card {span=2} {layout=hero} {tone=warning}` ``
+- `` `v-card {span=2} {layout=hero} {tone=warning} {border=none}` ``
 
 | Key | Values |
 |-----|--------|
 | `span` | `2`–`7`, `full`, `fill` (default: grow equally on the row) |
 | `layout` | `hero` (any card); `inline` / `footer` (subcards only) |
 | `tone` | hex (`#8c65e6`), `rgb()` / `rgba()`, or `note` `tip` `warning` `danger` `success` `neutral` |
+| `border` | `none` (aliases `0`, `false`) — removes border and shadow |
 
 Same-line headings after the marker are promoted in Reading view:
 
@@ -79,6 +80,7 @@ Use a `v-tabs` fence. Install **Augur** and run **Insert Visage tabs** to paste 
 | `POSITION` | `top`, `bottom`, `left`, `right` |
 | `ALIGN` | `left`, `right`, `center` / `centre`, `justify` (top/bottom nav only) |
 | `TAB: Title` | Starts a tab; following lines until the next `TAB:` are markdown |
+| `TAB: Title {tone=…}` | Same Tone presets / HEX / `rgb()` as cards; bags stripped from the label |
 
 Deep links: `[[Note#Tab Title]]` opens that tab (skipped if a real heading of the same name exists). Nested `v-tabs` blocks are not supported.
 

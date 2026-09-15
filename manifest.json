@@ -1,7 +1,7 @@
 {
 	"id": "visage",
 	"name": "Visage",
-	"version": "0.3.1",
+	"version": "0.4.0",
 	"minAppVersion": "1.5.0",
 	"description": "Reading-view cards (`v-card`) and tabs (`v-tabs`) for note layout.",
 	"author": "FootPrintStudio",

@@ -1,5 +1,5 @@
 import { assignFillSpans, DECK_COLUMNS } from "./fillSpans";
-import { isVCardMarkerText, parseVCardMarker, type SpanValue } from "./parseMarker";
+import { applyTone, isVCardMarkerText, parseVCardMarker, type SpanValue } from "./parseMarker";
 import { promoteSameLineHeading } from "./promoteHeading";
 import type { VisageSettings } from "./types";
 
@@ -51,6 +51,7 @@ function processListItem(li: HTMLElement): void {
 	li.dataset.visageSpan = String(parsed.span);
 	applyLayout(li, parsed.layout, insideCard);
 	applyTone(li, parsed.tone);
+	if (parsed.border === "none") li.classList.add("visage-borderless");
 
 	if (parsed.errors.length > 0) {
 		li.classList.add("visage-has-error");
@@ -77,19 +78,6 @@ function applyLayout(
 	if (!isSubcard) return;
 	if (layout === "inline") li.classList.add("visage-inline");
 	if (layout === "footer") li.classList.add("visage-footer");
-}
-
-function applyTone(
-	li: HTMLElement,
-	tone: { kind: "preset"; value: string } | { kind: "color"; value: string } | undefined,
-): void {
-	if (!tone) return;
-	if (tone.kind === "preset") {
-		li.classList.add(`visage-tone-${tone.value}`);
-		return;
-	}
-	li.classList.add("visage-tone-color");
-	li.style.setProperty("--deck-tone", tone.value);
 }
 
 function layoutList(ul: HTMLElement): void {

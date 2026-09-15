@@ -1,3 +1,5 @@
+import type { ToneValue } from "../parseMarker";
+
 export type TabPosition = "top" | "bottom" | "left" | "right";
 
 export type TabAlign = "left" | "right" | "center" | "justify";
@@ -16,6 +18,7 @@ export interface ParsedTab {
 	body: string;
 	line: number;
 	linkSlug: string;
+	tone?: ToneValue;
 }
 
 export interface ParsedVTabsBlock {

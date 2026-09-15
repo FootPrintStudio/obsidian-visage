@@ -1,4 +1,5 @@
 import { App, Component, MarkdownRenderChild, MarkdownRenderer } from "obsidian";
+import { applyTone } from "../parseMarker";
 import type { ParsedTab } from "./types";
 
 export class TabPanel extends MarkdownRenderChild {
@@ -71,6 +72,7 @@ export function renderTabsView(
 			},
 		});
 		btn.createSpan({ cls: "visage-tabs-nav-label", text: tab.title });
+		applyTone(btn, tab.tone);
 
 		const select = (): void => {
 			onSelect(index);

@@ -1,3 +1,4 @@
+import { parseAttributeBags, parseTone, type ToneValue } from "../parseMarker";
 import type { ParseError, ParsedTab, ParsedVTabsBlock, TabAlign, TabPosition, VTabsSettings } from "./types";
 import { TAB_ALIGNS, TAB_POSITIONS } from "./types";
 
@@ -54,7 +55,40 @@ function slugifyTitle(title: string): string {
 		.replace(/^-+|-+$/g, "");
 }
 
-/** Returns tab title when line is a TAB: directive, otherwise null. */
+interface ParsedTabHeader {
+	title: string;
+	tone?: ToneValue;
+}
+
+/** Parse `TAB: Title {tone=…}` — bags stripped from displayed title. */
+function parseTabHeader(value: string, line: number, errors: ParseError[]): ParsedTabHeader | null {
+	const { title, bags, errors: bagErrors } = parseAttributeBags(value);
+	for (const msg of bagErrors) {
+		errors.push({ line, message: msg });
+	}
+	if (!title.trim()) {
+		errors.push({ line, message: "TAB requires a title." });
+		return null;
+	}
+
+	let tone: ToneValue | undefined;
+	for (const bag of bags) {
+		if (bag.key === "tone") {
+			const parsed = parseTone(bag.value);
+			if (parsed === null) {
+				errors.push({ line, message: `Invalid tone “${bag.value}”` });
+			} else {
+				tone = parsed;
+			}
+		} else {
+			errors.push({ line, message: `Unknown TAB attribute “${bag.key}”` });
+		}
+	}
+
+	return { title: title.trim(), tone };
+}
+
+/** Returns remaining text after TAB: when line is a TAB directive, otherwise null. */
 function parseTabDirective(line: string): string | null {
 	const match = line.match(/^TAB\s*:(.*)$/i);
 	return match ? match[1]!.trim() : null;
@@ -70,6 +104,7 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 	const tabs: ParsedTab[] = [];
 
 	let currentTitle: string | null = null;
+	let currentTone: ToneValue | undefined;
 	let currentBodyLines: string[] = [];
 	let currentTabLine = 0;
 
@@ -81,9 +116,19 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 			body: bodyLines.join("\n"),
 			line: currentTabLine,
 			linkSlug: slugifyTitle(currentTitle),
+			tone: currentTone,
 		});
 		currentTitle = null;
+		currentTone = undefined;
 		currentBodyLines = [];
+	};
+
+	const startTab = (headerRaw: string, lineNum: number): void => {
+		const header = parseTabHeader(headerRaw, lineNum, errors);
+		if (!header) return;
+		currentTitle = header.title;
+		currentTone = header.tone;
+		currentTabLine = lineNum;
 	};
 
 	const lines = source.split("\n");
@@ -92,18 +137,13 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 		const lineNum = i + 1;
 
 		if (inTabs && currentTitle !== null) {
-			const tabTitle = parseTabDirective(normalizeLine(rawLine));
-			if (tabTitle === null) {
+			const tabValue = parseTabDirective(normalizeLine(rawLine));
+			if (tabValue === null) {
 				currentBodyLines.push(rawLine);
 				continue;
 			}
 			flushTab();
-			if (!tabTitle) {
-				errors.push({ line: lineNum, message: "TAB requires a title." });
-				continue;
-			}
-			currentTitle = tabTitle;
-			currentTabLine = lineNum;
+			startTab(tabValue, lineNum);
 			continue;
 		}
 
@@ -130,12 +170,7 @@ export function parseVTabsBlock(source: string, settings: VTabsSettings): Parsed
 		if (key === "TAB") {
 			inTabs = true;
 			flushTab();
-			if (!value) {
-				errors.push({ line: lineNum, message: "TAB requires a title." });
-				continue;
-			}
-			currentTitle = value;
-			currentTabLine = lineNum;
+			startTab(value, lineNum);
 			continue;
 		}
 
