@@ -20,6 +20,7 @@ describe("parseVCardMarker", () => {
 	it("returns defaults for a bare marker", () => {
 		expect(parseVCardMarker("v-card")).toEqual({
 			span: 1,
+			rows: undefined,
 			layout: undefined,
 			tone: undefined,
 			border: undefined,
@@ -31,11 +32,18 @@ describe("parseVCardMarker", () => {
 		const parsed = parseVCardMarker("v-card {tone=warning} {span=full} {layout=hero}");
 		expect(parsed).toEqual({
 			span: "full",
+			rows: undefined,
 			layout: "hero",
 			tone: { kind: "preset", value: "warning" },
 			border: undefined,
 			errors: [],
 		});
+	});
+
+	it("parses rows 1–8", () => {
+		expect(parseVCardMarker("v-card {rows=2}")?.rows).toBe(2);
+		expect(parseVCardMarker("v-card {span=4} {rows=8}")?.rows).toBe(8);
+		expect(parseVCardMarker("v-card {rows=1}")?.rows).toBe(1);
 	});
 
 	it("parses hex and rgba tones", () => {
@@ -72,9 +80,18 @@ describe("parseVCardMarker", () => {
 
 	it("rejects invalid values", () => {
 		expect(parseVCardMarker("v-card {span=9}")?.errors.length).toBeGreaterThan(0);
+		expect(parseVCardMarker("v-card {rows=0}")?.errors.length).toBeGreaterThan(0);
+		expect(parseVCardMarker("v-card {rows=9}")?.errors.length).toBeGreaterThan(0);
+		expect(parseVCardMarker("v-card {rows=2.5}")?.errors.length).toBeGreaterThan(0);
 		expect(parseVCardMarker("v-card {layout=split}")?.errors.length).toBeGreaterThan(0);
 		expect(parseVCardMarker("v-card {tone=purple}")?.errors.length).toBeGreaterThan(0);
 		expect(parseVCardMarker("v-card {border=thick}")?.errors.length).toBeGreaterThan(0);
+	});
+
+	it("records duplicate rows", () => {
+		const dup = parseVCardMarker("v-card {rows=2} {rows=3}");
+		expect(dup?.rows).toBe(2);
+		expect(dup?.errors.some((e) => e.toLowerCase().includes("duplicate"))).toBe(true);
 	});
 
 	it("returns null for non-markers", () => {

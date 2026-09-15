@@ -1,6 +1,13 @@
 import type { SpanValue } from "./parseMarker";
 
-export const DECK_COLUMNS = 8;
+/** Authoring slots per row (`{span=2}` … `{span=7}`, wrap-at-8). */
+export const DECK_SLOTS = 8;
+
+/** CSS grid tracks per authoring slot — finer grid so odd card counts share width evenly. */
+export const TRACKS_PER_SLOT = 3;
+
+/** Total CSS grid columns (`DECK_SLOTS * TRACKS_PER_SLOT`). */
+export const DECK_COLUMNS = DECK_SLOTS * TRACKS_PER_SLOT;
 
 export interface SpanItem<T = unknown> {
 	id: T;
@@ -9,51 +16,59 @@ export interface SpanItem<T = unknown> {
 
 export interface AssignedSpan<T = unknown> {
 	id: T;
-	/** Insert a flex row-break before this item. */
-	rowStart: boolean;
+	/** Grid column span (1–DECK_COLUMNS) after packing default/`fill` growers. */
+	columns: number;
 }
 
 /**
- * Pack items into rows of at most 8 slots.
+ * Pack items into rows of at most 8 authoring slots and assign integer grid tracks.
  *
- * Width is CSS flex (default/`fill` grow equally; `2`–`7` are a fixed fraction of 8;
- * `full` is 100%). This function only decides where rows wrap:
- *
+ * Wrap rules (unchanged from flex era):
  * - Default and `fill` each count as 1 slot toward wrap-at-8
  * - `2`–`7`: that many slots; wrap when they would exceed 8
  * - `full`: owns a row
  * - `fill` closes the current row for later literals; consecutive fills stay together
+ *
+ * Within each row, leftover **tracks** after literal `2`–`7` are distributed among
+ * default/`fill` growers. Literal N occupies `N * TRACKS_PER_SLOT` tracks.
  */
-export function assignFillSpans<T>(items: SpanItem<T>[], columns = DECK_COLUMNS): AssignedSpan<T>[] {
-	const out: AssignedSpan<T>[] = items.map((item) => ({ id: item.id, rowStart: false }));
-
+export function assignFillSpans<T>(
+	items: SpanItem<T>[],
+	slots = DECK_SLOTS,
+	tracksPerSlot = TRACKS_PER_SLOT,
+): AssignedSpan<T>[] {
+	const tracks = slots * tracksPerSlot;
+	const rows: SpanItem<T>[][] = [];
+	let current: SpanItem<T>[] = [];
 	let used = 0;
 	let rowHasFill = false;
 	let needBreak = false;
 
-	const beginRow = (index: number): void => {
-		if (index > 0) out[index]!.rowStart = true;
+	const pushRow = (): void => {
+		if (current.length === 0) return;
+		rows.push(current);
+		current = [];
 		used = 0;
 		rowHasFill = false;
 		needBreak = false;
 	};
 
-	for (let i = 0; i < items.length; i++) {
-		const span = items[i]!.span;
+	for (const item of items) {
+		const span = item.span;
 
 		if (span === "full") {
-			if (i > 0) out[i]!.rowStart = true;
-			used = 0;
-			rowHasFill = false;
+			pushRow();
+			rows.push([item]);
 			needBreak = true;
 			continue;
 		}
 
 		if (span === "fill") {
-			if (needBreak || used >= columns) beginRow(i);
+			if (needBreak || used >= slots) pushRow();
+			current.push(item);
 			used += 1;
 			rowHasFill = true;
-			if (used >= columns) {
+			if (used >= slots) {
 				needBreak = true;
 				used = 0;
 				rowHasFill = false;
@@ -61,21 +76,70 @@ export function assignFillSpans<T>(items: SpanItem<T>[], columns = DECK_COLUMNS)
 			continue;
 		}
 
-		const n = spanToTracks(span, columns);
-		if (needBreak || rowHasFill || used + n > columns) beginRow(i);
+		const n = spanToSlots(span);
+		if (needBreak || rowHasFill || used + n > slots) pushRow();
+		current.push(item);
 		used += n;
-		if (used >= columns) {
+		if (used >= slots) {
 			needBreak = true;
 			used = 0;
 			rowHasFill = false;
 		}
 	}
+	pushRow();
 
+	const out: AssignedSpan<T>[] = [];
+	for (const row of rows) {
+		const cols = assignRowColumns(row, tracks, tracksPerSlot);
+		for (let i = 0; i < row.length; i++) {
+			out.push({ id: row[i]!.id, columns: cols[i]! });
+		}
+	}
 	return out;
 }
 
-function spanToTracks(span: SpanValue, columns: number): number {
-	if (span === "full") return columns;
+function assignRowColumns<T>(
+	row: SpanItem<T>[],
+	tracks: number,
+	tracksPerSlot: number,
+): number[] {
+	if (row.length === 1 && row[0]!.span === "full") return [tracks];
+
+	const result = new Array<number>(row.length).fill(0);
+	const growIdx: number[] = [];
+	let fixed = 0;
+
+	for (let i = 0; i < row.length; i++) {
+		const span = row[i]!.span;
+		if (span === "full") {
+			result[i] = tracks;
+			continue;
+		}
+		if (typeof span === "number" && span >= 2) {
+			const n = span * tracksPerSlot;
+			result[i] = n;
+			fixed += n;
+			continue;
+		}
+		// default (1) or fill — grow into leftover
+		growIdx.push(i);
+	}
+
+	if (growIdx.length === 0) return result;
+
+	const leftover = Math.max(0, tracks - fixed);
+	const base = Math.floor(leftover / growIdx.length);
+	let rem = leftover % growIdx.length;
+	for (const i of growIdx) {
+		const n = Math.max(1, base + (rem > 0 ? 1 : 0));
+		if (rem > 0) rem--;
+		result[i] = n;
+	}
+	return result;
+}
+
+function spanToSlots(span: SpanValue): number {
+	if (span === "full") return DECK_SLOTS;
 	if (span === "fill") return 1;
 	return span;
 }

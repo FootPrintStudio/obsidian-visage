@@ -10,15 +10,17 @@ body {
 	--deck-border-width: 1px;
 	--deck-aspect-ratio: auto;
 	--deck-card-radius: var(--radius-s, 5px);
+	--deck-row-min: 10rem;
 }
 
 /* ------------------- */
-/* 8-slot card deck (flex: odd counts share leftover equally) */
+/* 8-column card deck (CSS Grid; hybrid content vs mosaic row heights) */
 
 .markdown-preview-view ul.visage-deck {
-	--deck-col: calc((100% - 7 * var(--deck-gap)) / 8);
-	display: flex;
-	flex-wrap: wrap;
+	display: grid;
+	/* 24 tracks = 8 authoring slots × 3 (even 3-across; literals still N/8 width) */
+	grid-template-columns: repeat(24, minmax(0, 1fr));
+	grid-auto-rows: auto;
 	align-items: stretch;
 	gap: var(--deck-gap);
 	padding: 0;
@@ -26,31 +28,24 @@ body {
 	list-style: none;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-flex-break {
-	flex: 0 0 100%;
-	height: 0;
-	margin: 0;
-	padding: 0;
-	border: none;
-	overflow: hidden;
-	list-style: none;
-	pointer-events: none;
+/* Any top-level {rows=N} with N>1: mosaic track units + dense hole-filling */
+.markdown-preview-view ul.visage-deck.visage-deck-mosaic {
+	grid-auto-rows: minmax(var(--deck-row-min), auto);
+	grid-auto-flow: dense;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-flex-break > .list-bullet,
-.markdown-preview-view ul.visage-deck > li.visage-flex-break > .list-collapse-indicator,
-.markdown-preview-view ul.visage-deck > li.visage-flex-break > .collapse-indicator {
-	display: none !important;
+.markdown-preview-view ul.visage-deck > li.visage-flex-break {
+	display: none;
 }
 
 .markdown-preview-view ul.visage-deck > li.visage-plain-row {
-	flex: 0 0 100%;
+	grid-column: 1 / -1;
 	list-style: none;
 	padding-inline-start: var(--list-indent, 2em);
 }
 
 .markdown-preview-view ul.visage-deck > li.visage-card {
-	flex: 1 1 var(--deck-col);
+	grid-column: span 1;
 	box-sizing: border-box;
 	min-width: 0;
 	max-width: 100%;
@@ -68,37 +63,41 @@ body {
 		border-color 0.15s linear;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="2"] {
-	flex: 0 0 calc(var(--deck-col) * 2 + var(--deck-gap) * 1);
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-rows="2"] {
+	grid-row: span 2;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="3"] {
-	flex: 0 0 calc(var(--deck-col) * 3 + var(--deck-gap) * 2);
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-rows="3"] {
+	grid-row: span 3;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="4"] {
-	flex: 0 0 calc(var(--deck-col) * 4 + var(--deck-gap) * 3);
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-rows="4"] {
+	grid-row: span 4;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="5"] {
-	flex: 0 0 calc(var(--deck-col) * 5 + var(--deck-gap) * 4);
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-rows="5"] {
+	grid-row: span 5;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="6"] {
-	flex: 0 0 calc(var(--deck-col) * 6 + var(--deck-gap) * 5);
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-rows="6"] {
+	grid-row: span 6;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="7"] {
-	flex: 0 0 calc(var(--deck-col) * 7 + var(--deck-gap) * 6);
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-rows="7"] {
+	grid-row: span 7;
 }
 
-.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-span="full"] {
-	flex: 0 0 100%;
+.markdown-preview-view ul.visage-deck > li.visage-card[data-visage-rows="8"] {
+	grid-row: span 8;
 }
 
 @media (max-width: 400pt) {
+	.markdown-preview-view ul.visage-deck {
+		grid-template-columns: 1fr;
+	}
+
 	.markdown-preview-view ul.visage-deck > li.visage-card {
-		flex: 0 0 100% !important;
+		grid-column: 1 / -1 !important;
 	}
 }
 

@@ -12,6 +12,8 @@ export type ToneValue =
 
 export interface ParsedVCard {
 	span: SpanValue;
+	/** Row span 1–8; omitted means 1. */
+	rows?: number;
 	layout?: LayoutValue;
 	tone?: ToneValue;
 	border?: BorderValue;
@@ -44,12 +46,13 @@ export function parseVCardMarker(raw: string): ParsedVCard | null {
 	const errors: string[] = [];
 	const seen = new Set<string>();
 	let span: SpanValue = 1;
+	let rows: number | undefined;
 	let layout: LayoutValue | undefined;
 	let tone: ToneValue | undefined;
 	let border: BorderValue | undefined;
 
 	if (!rest) {
-		return { span, errors };
+		return { span, rows, layout, tone, border, errors };
 	}
 
 	let cursor = 0;
@@ -82,6 +85,10 @@ export function parseVCardMarker(raw: string): ParsedVCard | null {
 			const parsed = parseSpan(value);
 			if (parsed === null) errors.push(`Invalid span “${value}”`);
 			else span = parsed;
+		} else if (key === "rows") {
+			const parsed = parseRows(value);
+			if (parsed === null) errors.push(`Invalid rows “${value}”`);
+			else rows = parsed;
 		} else if (key === "layout") {
 			const parsed = parseLayout(value);
 			if (parsed === null) errors.push(`Invalid layout “${value}”`);
@@ -104,7 +111,7 @@ export function parseVCardMarker(raw: string): ParsedVCard | null {
 		errors.push(`Unexpected text “${trailing}”`);
 	}
 
-	return { span, layout, tone, border, errors };
+	return { span, rows, layout, tone, border, errors };
 }
 
 /**
@@ -173,6 +180,13 @@ function parseSpan(value: string): SpanValue | null {
 	if (/^[2-7]$/.test(v)) return Number(v) as SpanValue;
 	if (v === "1") return 1;
 	return null;
+}
+
+/** Integer 1–8 inclusive. */
+function parseRows(value: string): number | null {
+	const v = value.trim();
+	if (!/^[1-8]$/.test(v)) return null;
+	return Number(v);
 }
 
 function parseLayout(value: string): LayoutValue | null {

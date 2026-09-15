@@ -49,6 +49,11 @@ function processListItem(li: HTMLElement): void {
 	marker.setAttribute("aria-hidden", "true");
 
 	li.dataset.visageSpan = String(parsed.span);
+	if (!insideCard && parsed.rows != null && parsed.rows > 1) {
+		li.dataset.visageRows = String(parsed.rows);
+	} else {
+		delete li.dataset.visageRows;
+	}
 	applyLayout(li, parsed.layout, insideCard);
 	applyTone(li, parsed.tone);
 	if (parsed.border === "none") li.classList.add("visage-borderless");
@@ -104,16 +109,19 @@ function layoutDeck(ul: HTMLElement): void {
 	}
 
 	const items: { id: HTMLElement; span: SpanValue }[] = [];
+	let mosaic = false;
 
 	for (const child of Array.from(ul.children)) {
 		if (!(child instanceof HTMLElement) || child.tagName !== "LI") continue;
 		if (child.classList.contains("visage-flex-break")) continue;
 		if (child.classList.contains("visage-card") && !child.classList.contains("visage-subcard")) {
 			child.style.gridColumn = "";
+			const rows = Number(child.dataset.visageRows ?? "1");
+			if (rows > 1) mosaic = true;
 			items.push({ id: child, span: readSpan(child) });
 		} else {
 			if (items.length > 0) {
-				applyAssignments(ul, assignFillSpans(items, DECK_COLUMNS));
+				applyAssignments(assignFillSpans(items));
 				items.length = 0;
 			}
 			child.classList.add("visage-plain-row");
@@ -121,7 +129,9 @@ function layoutDeck(ul: HTMLElement): void {
 		}
 	}
 
-	if (items.length > 0) applyAssignments(ul, assignFillSpans(items, DECK_COLUMNS));
+	if (items.length > 0) applyAssignments(assignFillSpans(items));
+
+	ul.classList.toggle("visage-deck-mosaic", mosaic);
 }
 
 function layoutNested(ul: HTMLElement): void {
@@ -187,17 +197,11 @@ function ensureCardBody(card: HTMLElement): void {
 	else card.appendChild(body);
 }
 
-function applyAssignments(
-	ul: HTMLElement,
-	assigned: { id: HTMLElement; rowStart: boolean }[],
-): void {
+function applyAssignments(assigned: { id: HTMLElement; columns: number }[]): void {
 	for (const item of assigned) {
-		item.id.style.gridColumn = "";
-		if (!item.rowStart) continue;
-		const br = document.createElement("li");
-		br.className = "visage-flex-break";
-		br.setAttribute("aria-hidden", "true");
-		ul.insertBefore(br, item.id);
+		const n = Math.min(DECK_COLUMNS, Math.max(1, item.columns));
+		item.id.dataset.visageCols = String(n);
+		item.id.style.gridColumn = `span ${n}`;
 	}
 }
 

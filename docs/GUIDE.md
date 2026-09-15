@@ -14,7 +14,7 @@ The **first** inline code on a list item must be `v-card`, optionally followed b
 ```
 
 - Bags may appear in any order.
-- At most one `span`, one `layout`, one `tone`, and one `border`.
+- At most one `span`, one `rows`, one `layout`, one `tone`, and one `border`.
 - Unknown keys show a small error on the card.
 - Other inline code (including Grimoire `` `q=` ``) is never treated as a card marker.
 
@@ -31,23 +31,23 @@ Do **not** wrap card bodies in fenced ` ``` ` blocks.
 
 - Nested item **with** `` `v-card` `` → **subcard**
 - Nested item **without** `` `v-card` `` → **normal nested list**
-- A `ul` becomes a card deck (8 slots per row) when a **direct** child is a card and the list is not already inside a card
+- A `ul` becomes a card deck (8 columns) when a **direct** child is a card and the list is not already inside a card
 - Unmarked top-level siblings in that deck stay ordinary full-width rows
 
-## Span (8 slots per row)
+## Span (8 columns)
 
-At normal note widths the deck wraps at **8 slots**. Default and `fill` cards **grow equally** on that row (3 cards → three equal thirds; 5 → fifths). Literal `2`–`7` stay a fixed fraction of 8. Narrow panes stack to one column and ignore spans.
+At normal note widths the deck wraps at **8 authoring slots**, drawn on a finer **24-track** CSS Grid (so common odd counts stay even). Default and `fill` cards share leftover tracks on that row (3 cards → three equal thirds). Literal `2`–`7` stay a fixed fraction of the row (`N/8`). Narrow panes stack to one column and ignore column spans (row spans still apply).
 
 | Value | Width |
 |-------|--------|
-| *(omitted)* | Grow equally with other default/`fill` cards on the row (counts as 1 slot toward wrap-at-8) |
+| *(omitted)* | Share leftover tracks with other default/`fill` cards on the row (counts as 1 slot toward wrap-at-8) |
 | `2`–`7` | Fixed share of the row (`N/8`) |
 | `full` | Entire row |
-| `fill` | Grow to share leftover **equally** with other default/`fill` cards after siblings’ literal spans |
+| `fill` | Share leftover tracks **equally** with other default/`fill` cards after siblings’ literal spans |
 
-Example: `{span=2}` + `{span=3}` + `{span=fill}` → 2/8 + 3/8 + **the rest** (one equal `1fr` slice, not extra integer tracks on the last card).
+Example: `{span=2}` + `{span=3}` + `{span=fill}` → 2/8 + 3/8 + **3/8**.
 
-A row of only default or `fill` cards (3, 5, or 7) is even. Multiple `fill` on one row share leftover equally. `fill` also closes the row for a following literal span (`{span=fill}` then `{span=2}` → two rows).
+A row of only default or `fill` cards shares the row as evenly as integer tracks allow (3 → exact thirds; 5 and 7 still have a 1-track remainder on the last card). Multiple `fill` on one row share leftover equally. `fill` also closes the row for a following literal span (`{span=fill}` then `{span=2}` → two rows).
 
 ```markdown
 - `v-card` Alpha
@@ -55,7 +55,7 @@ A row of only default or `fill` cards (3, 5, or 7) is even. Multiple `fill` on o
 - `v-card` Gamma
 ```
 
-Those three are equal width. You do not need `{span=fill}` just to stretch a short row.
+Those three share the row. You do not need `{span=fill}` just to stretch a short row.
 
 ```markdown
 - `v-card {span=2}` Wide
@@ -63,6 +63,22 @@ Those three are equal width. You do not need `{span=fill}` just to stretch a sho
 - `v-card {span=fill}` Takes the rest of the row
 - `v-card {span=full}` Own row
 ```
+
+## Rows (mosaic height)
+
+`{rows=N}` (integer **1–8**, default **1**) is **top-level cards only**. Subcards ignore it.
+
+- If **no** card in the deck uses `rows` greater than 1, row height follows **content** (tallest card in that row), same as before.
+- If **any** top-level card uses `{rows=2}` or higher, the deck switches to **mosaic** mode: row tracks use a minimum height (`--deck-row-min`, default `10rem`), and `grid-auto-flow: dense` lets later cards fill holes beside tall tiles.
+
+```markdown
+- `v-card {span=4} {rows=2}` Tall half-width
+- `v-card {span=4}` Short half (may sit beside or below under dense packing)
+- `v-card {span=2} {rows=2}`
+- `v-card {span=6}`
+```
+
+Invalid `rows` values show the same error badge as bad `span` / `tone`.
 
 ## Layout
 

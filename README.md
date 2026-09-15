@@ -24,7 +24,7 @@ TAB: Details
 ````
 `````
 
-A top-level list becomes a card deck (wraps at 8 slots) when it has at least one `v-card` child. Default cards on a short row share the width equally.
+A top-level list becomes a card deck (8-column grid) when it has at least one `v-card` child. Default cards on a short row share the width. Optional `{rows=N}` (top-level only) builds mosaic heights when any card uses `rows` greater than 1.
 
 ## Install (BRAT)
 
@@ -55,11 +55,12 @@ Required, first inline code on the item:
 
 Optional exclusive bags (at most one of each key; order does not matter):
 
-- `` `v-card {span=2} {layout=hero} {tone=warning} {border=none}` ``
+- `` `v-card {span=2} {rows=2} {layout=hero} {tone=warning} {border=none}` ``
 
 | Key | Values |
 |-----|--------|
-| `span` | `2`–`7`, `full`, `fill` (default: grow equally on the row) |
+| `span` | `2`–`7`, `full`, `fill` (default: share leftover columns on the row) |
+| `rows` | `1`–`8` (default `1`; top-level only; any `rows>1` enables mosaic track heights) |
 | `layout` | `hero` (any card); `inline` / `footer` (subcards only) |
 | `tone` | hex (`#8c65e6`), `rgb()` / `rgba()`, or `note` `tip` `warning` `danger` `success` `neutral` |
 | `border` | `none` (aliases `0`, `false`) — removes border and shadow |

@@ -1,48 +1,49 @@
 import { describe, expect, it } from "vitest";
-import { assignFillSpans } from "../src/fillSpans";
+import { assignFillSpans, DECK_COLUMNS } from "../src/fillSpans";
 
 describe("assignFillSpans", () => {
-	it("keeps a short row of default cards together", () => {
+	it("gives three default cards equal width on a 24-track row", () => {
 		const out = assignFillSpans([
 			{ id: "a", span: 1 },
 			{ id: "b", span: 1 },
 			{ id: "c", span: 1 },
 		]);
-		expect(out.map((x) => x.rowStart)).toEqual([false, false, false]);
+		expect(out.map((x) => x.columns)).toEqual([8, 8, 8]);
+		expect(out.reduce((s, x) => s + x.columns, 0)).toBe(DECK_COLUMNS);
 	});
 
-	it("wraps the 9th default card", () => {
+	it("wraps the 9th default card onto a new row", () => {
 		const items = Array.from({ length: 9 }, (_, i) => ({ id: String(i), span: 1 as const }));
 		const out = assignFillSpans(items);
-		expect(out.slice(0, 8).every((x) => !x.rowStart)).toBe(true);
-		expect(out[8]?.rowStart).toBe(true);
+		expect(out.slice(0, 8).every((x) => x.columns === 3)).toBe(true);
+		expect(out[8]?.columns).toBe(DECK_COLUMNS);
 	});
 
-	it("keeps 2 + 3 + fill on one row", () => {
+	it("gives leftover tracks to fill after literals", () => {
 		const out = assignFillSpans([
 			{ id: "a", span: 2 },
 			{ id: "b", span: 3 },
 			{ id: "c", span: "fill" },
 		]);
-		expect(out.map((x) => x.rowStart)).toEqual([false, false, false]);
+		// 2→6, 3→9, fill→9
+		expect(out.map((x) => x.columns)).toEqual([6, 9, 9]);
 	});
 
-	it("keeps fill siblings on one row (equal CSS grow, no leftover tracks)", () => {
+	it("shares leftover among fill siblings", () => {
 		const out = assignFillSpans([
 			{ id: "a", span: 1 },
 			{ id: "b", span: "fill" },
 			{ id: "c", span: "fill" },
 		]);
-		expect(out.map((x) => x.rowStart)).toEqual([false, false, false]);
+		expect(out.map((x) => x.columns)).toEqual([8, 8, 8]);
 	});
 
-	it("wraps numerics that would exceed 8", () => {
+	it("wraps numerics that would exceed 8 slots", () => {
 		const out = assignFillSpans([
 			{ id: "a", span: 5 },
 			{ id: "b", span: 5 },
 		]);
-		expect(out[0]?.rowStart).toBe(false);
-		expect(out[1]?.rowStart).toBe(true);
+		expect(out.map((x) => x.columns)).toEqual([15, 15]);
 	});
 
 	it("starts a new row after fill for a following literal", () => {
@@ -50,8 +51,8 @@ describe("assignFillSpans", () => {
 			{ id: "a", span: "fill" },
 			{ id: "b", span: 2 },
 		]);
-		expect(out[0]?.rowStart).toBe(false);
-		expect(out[1]?.rowStart).toBe(true);
+		expect(out[0]?.columns).toBe(DECK_COLUMNS);
+		expect(out[1]?.columns).toBe(6);
 	});
 
 	it("lets full own a row", () => {
@@ -60,12 +61,20 @@ describe("assignFillSpans", () => {
 			{ id: "b", span: "full" },
 			{ id: "c", span: 1 },
 		]);
-		expect(out.map((x) => x.rowStart)).toEqual([false, true, true]);
+		expect(out.map((x) => x.columns)).toEqual([DECK_COLUMNS, DECK_COLUMNS, DECK_COLUMNS]);
 	});
 
 	it("wraps the 9th fill", () => {
 		const items = Array.from({ length: 9 }, (_, i) => ({ id: String(i), span: "fill" as const }));
 		const out = assignFillSpans(items);
-		expect(out[8]?.rowStart).toBe(true);
+		expect(out.slice(0, 8).every((x) => x.columns === 3)).toBe(true);
+		expect(out[8]?.columns).toBe(DECK_COLUMNS);
+	});
+
+	it("keeps five default cards nearly even", () => {
+		const out = assignFillSpans(
+			Array.from({ length: 5 }, (_, i) => ({ id: String(i), span: 1 as const })),
+		);
+		expect(out.map((x) => x.columns)).toEqual([5, 5, 5, 5, 4]);
 	});
 });
