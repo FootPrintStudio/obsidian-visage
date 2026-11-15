@@ -64,6 +64,54 @@ describe("assignFillSpans", () => {
 		expect(out.map((x) => x.columns)).toEqual([DECK_COLUMNS, DECK_COLUMNS, DECK_COLUMNS]);
 	});
 
+	it("does not force cards after full onto solo full-width rows", () => {
+		// Carl repro: full anywhere except last must not widen every card below.
+		const out = assignFillSpans([
+			{ id: "a", span: 1 },
+			{ id: "b", span: 1 },
+			{ id: "c", span: "full" },
+			{ id: "d", span: 1 },
+			{ id: "e", span: 1 },
+			{ id: "f", span: 1 },
+		]);
+		expect(out.map((x) => x.columns)).toEqual([
+			12,
+			12,
+			DECK_COLUMNS,
+			8,
+			8,
+			8,
+		]);
+	});
+
+	it("packs defaults after a leading full onto one shared row", () => {
+		const out = assignFillSpans([
+			{ id: "a", span: "full" },
+			{ id: "b", span: 1 },
+			{ id: "c", span: 1 },
+		]);
+		expect(out.map((x) => x.columns)).toEqual([DECK_COLUMNS, 12, 12]);
+	});
+
+	it("lets leading fill share a row with following defaults", () => {
+		// Carl: first-card fill taking full width when siblings follow was unexpected.
+		const out = assignFillSpans([
+			{ id: "a", span: "fill" },
+			{ id: "b", span: 1 },
+			{ id: "c", span: 1 },
+		]);
+		expect(out.map((x) => x.columns)).toEqual([8, 8, 8]);
+	});
+
+	it("still closes the row after fill for a following literal", () => {
+		const out = assignFillSpans([
+			{ id: "a", span: "fill" },
+			{ id: "b", span: 1 },
+			{ id: "c", span: 2 },
+		]);
+		expect(out.map((x) => x.columns)).toEqual([12, 12, 6]);
+	});
+
 	it("wraps the 9th fill", () => {
 		const items = Array.from({ length: 9 }, (_, i) => ({ id: String(i), span: "fill" as const }));
 		const out = assignFillSpans(items);
