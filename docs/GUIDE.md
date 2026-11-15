@@ -47,7 +47,7 @@ At normal note widths the deck wraps at **8 authoring slots**, drawn on a finer 
 
 Example: `{span=2}` + `{span=3}` + `{span=fill}` → 2/8 + 3/8 + **3/8**.
 
-A row of only default or `fill` cards shares the row as evenly as integer tracks allow (3 → exact thirds; 5 and 7 still have a 1-track remainder on the last card). Multiple `fill` on one row share leftover equally. `fill` also closes the row for a following literal span (`{span=fill}` then `{span=2}` → two rows).
+A row of only default or `fill` cards shares the row as evenly as integer tracks allow (3 → exact thirds; 5 and 7 still have a 1-track remainder on the last card). Multiple `fill` on one row share leftover equally. A leading `{span=fill}` **shares** with following default cards on the same row (it does not solo full-width unless it is alone or only followed by a literal that starts the next row). `fill` closes the row for a following **literal** span only (`{span=fill}` then `{span=2}` → two rows). `{span=full}` owns its row; cards after it pack normally and are **not** forced full-width.
 
 ```markdown
 - `v-card` Alpha

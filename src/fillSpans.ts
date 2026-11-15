@@ -23,11 +23,12 @@ export interface AssignedSpan<T = unknown> {
 /**
  * Pack items into rows of at most 8 authoring slots and assign integer grid tracks.
  *
- * Wrap rules (unchanged from flex era):
- * - Default and `fill` each count as 1 slot toward wrap-at-8
+ * Wrap rules:
+ * - Default and `fill` each count as 1 slot toward wrap-at-8 and share leftover tracks
  * - `2`–`7`: that many slots; wrap when they would exceed 8
- * - `full`: owns a row
- * - `fill` closes the current row for later literals; consecutive fills stay together
+ * - `full`: owns a row; following cards pack normally on subsequent rows
+ * - `fill` closes the current row for a following **literal** (`2`–`7`) only;
+ *   consecutive fills and defaults stay on the same row
  *
  * Within each row, leftover **tracks** after literal `2`–`7` are distributed among
  * default/`fill` growers. Literal N occupies `N * TRACKS_PER_SLOT` tracks.
@@ -45,9 +46,12 @@ export function assignFillSpans<T>(
 	let needBreak = false;
 
 	const pushRow = (): void => {
-		if (current.length === 0) return;
-		rows.push(current);
-		current = [];
+		if (current.length > 0) {
+			rows.push(current);
+			current = [];
+		}
+		// Always clear row state — even when current was empty — so a sticky
+		// `needBreak` after `full` cannot force every following card onto its own row.
 		used = 0;
 		rowHasFill = false;
 		needBreak = false;
@@ -59,7 +63,7 @@ export function assignFillSpans<T>(
 		if (span === "full") {
 			pushRow();
 			rows.push([item]);
-			needBreak = true;
+			// Full already closed its own row; do not leave needBreak sticky.
 			continue;
 		}
 
@@ -77,7 +81,9 @@ export function assignFillSpans<T>(
 		}
 
 		const n = spanToSlots(span);
-		if (needBreak || rowHasFill || used + n > slots) pushRow();
+		// `fill` closes only for following literals (2–7), not for default (1).
+		const literalAfterFill = rowHasFill && n >= 2;
+		if (needBreak || literalAfterFill || used + n > slots) pushRow();
 		current.push(item);
 		used += n;
 		if (used >= slots) {
